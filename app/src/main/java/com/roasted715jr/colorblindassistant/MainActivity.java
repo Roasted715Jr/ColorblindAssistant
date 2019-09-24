@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
         //Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES); //This directory makes these photos private to the app by default
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "Colorblind Assistant"); //This directory makes these photos private to the app by default
 //        File storageDir = getExternalFilesDir(Environment.DIRECTORY_DCIM);
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
 

@@ -10,5 +10,5 @@
     <external-path name="external" path="." />
     <external-files-path
         name="external_files"
-        path="./Colorblind Assistant" />
+        path="./Colorblind Assistant" /> <!-- This seems to do nothing... -->
 </paths>
