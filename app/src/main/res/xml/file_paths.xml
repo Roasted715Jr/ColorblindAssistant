@@ -1,5 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<paths xmlns:android="http://schemas.android.com/apk/res/android">
-    <external-path name="my_images" path="Android/data/com.roasted715jr.colorblindassistant/files/Pictures" />
-<!--    <external-path name="DCIM" path="DCIM/Colorblind Assistant" />-->
+<paths>
+<!--    <external-path name="my_images" path="Android/data/com.roasted715jr.colorblindassistant/files/Pictures" />-->
+<!--    <external-files-path-->
+<!--        name="my_images"-->
+<!--        path="Pictures/Colorblind Assistant" />-->
+<!--    <external-path name="my_images" path="Pictures/Colorblind Assistant" />-->
+
+
+    <external-path name="external" path="." />
+    <external-files-path
+        name="external_files"
+        path="./Colorblind Assistant" />
 </paths>
