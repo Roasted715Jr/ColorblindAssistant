@@ -9,6 +9,8 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -84,9 +86,17 @@ public class MainActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            imageBitmap = (Bitmap) extras.get("data");
-            imgThumbnail.setImageBitmap(imageBitmap);
+//            Bundle extras = data.getExtras();
+//            imageBitmap = (Bitmap) extras.get("data");
+//            imgThumbnail.setImageBitmap(imageBitmap);
+
+            BitmapFactory.Options bmpFactoryOptions = new BitmapFactory.Options();
+            bmpFactoryOptions.inJustDecodeBounds = false;
+            imageBitmap = BitmapFactory.decodeFile(currentPhotoPath, bmpFactoryOptions);
+            Matrix rotateMatrix = new Matrix();
+            rotateMatrix.postRotate(90);
+            Bitmap rotatedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), rotateMatrix, false);
+            imgThumbnail.setImageBitmap(rotatedBitmap);
         }
 
         galleryAddPic();
@@ -122,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
             //Only proceed if the file was successfully created
             if (photoFile != null) {
                 Uri photoUri = FileProvider.getUriForFile(this, "com.roasted715jr.colorblindassistant", photoFile);
-//                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri); //Including this makes the thumbnail not work
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri); //Including this makes the thumbnail not work
                 startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
             }
         }
@@ -132,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
         //Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "Colorblind Assistant"); //This directory makes these photos private to the app by default
+        File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES + "/Colorblind Assistant/"); //This directory makes these photos private to the app by default
 //        File storageDir = getExternalFilesDir(Environment.DIRECTORY_DCIM);
         File image = File.createTempFile(imageFileName, ".jpg", storageDir);
 

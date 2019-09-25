@@ -8,13 +8,9 @@
 
     <ImageView
         android:id="@+id/img_thumbnail"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_marginTop="25dp"
-        android:layout_marginBottom="50dp"
-        android:scaleType="fitXY"
-        app:layout_constraintBottom_toTopOf="@+id/btn_take_picture"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_width="480dp"
+        android:layout_height="640dp"
+        android:scaleType="centerCrop"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
