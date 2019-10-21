@@ -10,12 +10,14 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -60,24 +62,24 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-//        imgThumbnail.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                int x = (int) event.getX();
-//                int y = (int) event.getY();
-//                Log.d(TAG, "" + x + ", " + y);
-//
-//                int pixel = imageBitmap.getPixel(x, y);
-////                Log.d(TAG, String.valueOf(pixel));
-//
-//                int r = Color.red(pixel);
-//                int g = Color.green(pixel);
-//                int b = Color.blue(pixel);
-//                Log.d(TAG, r + ", " + g + ", " + b);
-//
-//                return false; //Not sure what true would do
-//            }
-//        });
+        imgThumbnail.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int x = (int) (event.getX() * 1.75);
+                int y = (int) (event.getY() * 1.75);
+                Log.d(TAG, "" + x + ", " + y);
+
+                int pixel = imageBitmap.getPixel(x, y);
+//                Log.d(TAG, String.valueOf(pixel));
+
+                int r = Color.red(pixel);
+                int g = Color.green(pixel);
+                int b = Color.blue(pixel);
+                Log.d(TAG, r + ", " + g + ", " + b);
+
+                return false; //Not sure what true would do
+            }
+        });
     }
 
     //Retrieve the returned thumbnail image and display it
@@ -95,8 +97,8 @@ public class MainActivity extends AppCompatActivity {
             imageBitmap = BitmapFactory.decodeFile(currentPhotoPath, bmpFactoryOptions);
             Matrix rotateMatrix = new Matrix();
             rotateMatrix.postRotate(90);
-            Bitmap rotatedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), rotateMatrix, false);
-            imgThumbnail.setImageBitmap(rotatedBitmap);
+            imageBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), rotateMatrix, false);
+            imgThumbnail.setImageBitmap(imageBitmap);
         }
 
         galleryAddPic();
