@@ -6,16 +6,21 @@ import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Matrix;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -24,6 +29,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -33,11 +39,12 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     private static final int MY_PERMISSIONS_REQUEST_WRITE_STORAGE = 1234;
 
-    Bitmap imageBitmap;
+    Bitmap imageBitmap, rotatedBitmap;
     Button btnTakePicture;
     ImageView imgThumbnail;
     String currentPhotoPath;
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -59,25 +66,69 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Get the pixel colors
+        imgThumbnail.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //Image view is 1440px by 1920px
+                //Image size is 4032px by 3024px
+                int x = (int) (event.getX() / 1440 * 4032); //This is too big to access the bitmap
+                int y = (int) (event.getY() / 1920 * 3024);
+                Log.d(TAG, "Position: " + x + ", " + y);
 
-//        imgThumbnail.setOnTouchListener(new View.OnTouchListener() {
-//            @Override
-//            public boolean onTouch(View v, MotionEvent event) {
-//                int x = (int) event.getX();
-//                int y = (int) event.getY();
-//                Log.d(TAG, "" + x + ", " + y);
+                //Width of the square area we want to average
+                int squareSide = 21;
+
+                //[x][y][color]
+                int[][][] pixels = new int[squareSide][squareSide][3];
+
+                //Get each pixel's rgb
+                for (int i = 0; i < pixels.length; i++) {
+                    for (int j = 0; j < pixels[i].length; j++) {
+//                        pixels[i][j][0] = Color.red(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
+//                        pixels[i][j][1] = Color.green(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
+//                        pixels[i][j][2] = Color.blue(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
+                        pixels[i][j][0] = Color.red(rotatedBitmap.getPixel(x + i, y + j));
+                        pixels[i][j][1] = Color.green(rotatedBitmap.getPixel(x + i, y + j));
+                        pixels[i][j][2] = Color.blue(rotatedBitmap.getPixel(x + i, y + j));
+                    }
+                }
+
+                int[] pixelsAvg = new int[3];
+
+                //Average the values of each pixel
+                for (int i = 0; i < pixels.length; i++) {
+                    for (int j = 0; j < pixels[i].length; j++) {
+                        pixelsAvg[0] += pixels[i][j][0];
+                        pixelsAvg[1] += pixels[i][j][1];
+                        pixelsAvg[2] += pixels[i][j][2];
+                    }
+                }
+
+                pixelsAvg[0] /= Math.pow(squareSide, 2);
+                pixelsAvg[1] /= Math.pow(squareSide, 2);
+                pixelsAvg[2] /= Math.pow(squareSide, 2);
+
+//                String output = "";
+//                for (int i = 0; i < pixels.length; i++) {
+//                    for (int j = 0; j < pixels[i].length; j++) {
 //
-//                int pixel = imageBitmap.getPixel(x, y);
-////                Log.d(TAG, String.valueOf(pixel));
-//
-//                int r = Color.red(pixel);
-//                int g = Color.green(pixel);
-//                int b = Color.blue(pixel);
-//                Log.d(TAG, r + ", " + g + ", " + b);
-//
-//                return false; //Not sure what true would do
-//            }
-//        });
+//                    }
+//                }
+
+                Log.d(TAG, "Raw: " + Arrays.deepToString(pixels));
+                Log.d(TAG, "Color: " + pixelsAvg[0] + ", " + pixelsAvg[1] + ", " + pixelsAvg[2]);
+
+                return false; //Not sure what true would do
+            }
+        });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (rotatedBitmap != null)
+            imgThumbnail.setImageBitmap(rotatedBitmap);
     }
 
     //Retrieve the returned thumbnail image and display it
@@ -95,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
             imageBitmap = BitmapFactory.decodeFile(currentPhotoPath, bmpFactoryOptions);
             Matrix rotateMatrix = new Matrix();
             rotateMatrix.postRotate(90);
-            Bitmap rotatedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), rotateMatrix, false);
+            rotatedBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, imageBitmap.getWidth(), imageBitmap.getHeight(), rotateMatrix, false);
             imgThumbnail.setImageBitmap(rotatedBitmap);
         }
 
@@ -162,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 //        this.sendBroadcast(mediaScanIntent);
 
         grantUriPermission("com.roasted715jr.colorblindassistant", Uri.fromFile(f), 0);
-        MediaStore.Images.Media.insertImage(getContentResolver(), imageBitmap, "Title" , "Description");
+        MediaStore.Images.Media.insertImage(getContentResolver(), rotatedBitmap, "Title" , "Description");
 
         Log.d(TAG, "This jawn should be in the gallery now");
     }
