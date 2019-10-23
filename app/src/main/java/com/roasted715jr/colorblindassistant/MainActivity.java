@@ -80,7 +80,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, r + ", " + g + ", " + b);
 
 //                colorBox.setBackgroundColor(Color.rgb(r, g, b));
-                colorBox.setImageBitmap(Bitmap.createBitmap(new int[] {r, g, b, 1}, colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16));
+//                colorBox.setImageBitmap(Bitmap.createBitmap(new int[] {r, g, b, 1}, colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16));
+
+                Bitmap color = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
+                color.eraseColor(Color.rgb(r, g, b));
+                colorBox.setImageBitmap(color);
 
                 return false; //Not sure what true would do
             }
