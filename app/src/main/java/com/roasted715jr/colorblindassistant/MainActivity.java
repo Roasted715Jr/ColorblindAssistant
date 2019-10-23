@@ -12,6 +12,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
+import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -37,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
 
     Bitmap imageBitmap;
     Button btnTakePicture;
-    ImageView imgThumbnail;
+    ImageView imgThumbnail, colorBox;
     String currentPhotoPath;
 
     @Override
@@ -53,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
 
         btnTakePicture = (Button) findViewById(R.id.btn_take_picture);
         imgThumbnail = (ImageView) findViewById(R.id.img_thumbnail);
+        colorBox = (ImageView) findViewById(R.id.img_color);
 
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -77,9 +79,19 @@ public class MainActivity extends AppCompatActivity {
                 int b = Color.blue(pixel);
                 Log.d(TAG, r + ", " + g + ", " + b);
 
+//                colorBox.setBackgroundColor(Color.rgb(r, g, b));
+                colorBox.setImageBitmap(Bitmap.createBitmap(new int[] {r, g, b, 1}, colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16));
+
                 return false; //Not sure what true would do
             }
         });
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (imageBitmap != null)
+            imgThumbnail.setImageBitmap(imageBitmap);
     }
 
     //Retrieve the returned thumbnail image and display it
