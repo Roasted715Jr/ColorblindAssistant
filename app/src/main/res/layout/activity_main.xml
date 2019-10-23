@@ -8,9 +8,12 @@
 
     <ImageView
         android:id="@+id/img_thumbnail"
-        android:layout_width="480dp"
-        android:layout_height="640dp"
-        android:scaleType="centerCrop"
+        android:layout_width="2160px"
+        android:layout_height="1920px"
+        android:adjustViewBounds="true"
+        android:cropToPadding="false"
+        android:scaleType="centerInside"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
