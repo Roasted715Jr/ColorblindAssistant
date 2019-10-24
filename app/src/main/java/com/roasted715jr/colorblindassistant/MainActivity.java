@@ -111,11 +111,17 @@ public class MainActivity extends AppCompatActivity {
                     //                 Log.d(TAG, "Raw: " + Arrays.deepToString(pixels));
                     Log.d(TAG, "Color: " + r + ", " + g + ", " + b);
 
-                    Bitmap color = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
-                    color.eraseColor(Color.rgb(r, g, b));
-                    colorBox.setImageBitmap(color);
+                    Bitmap colorBitmap = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
+                    colorBitmap.eraseColor(Color.rgb(r, g, b)); //Fills bitmap with specified color
+                    colorBox.setImageBitmap(colorBitmap);
 
-                    txtColor.setText("Color Name" + "\nRed: " + r + "\nGreen: " + g + "\nBlue: " + b);
+//                    txtColor.setText(Colors.getColorSimple(r, g, b) + "\nRed: " + r + "\nGreen: " + g + "\nBlue: " + b);
+
+                    float[] hsv = new float[3];
+                    Color.colorToHSV(Color.rgb(r, g, b), hsv);
+                    Color color = Color.valueOf(Color.rgb(r, g, b));
+//                    txtColor.setText(Colors.getColorSimple(r, g, b) + "\nH: " + hsv[0] + "\nS: " + hsv[1] + "\nV: " + hsv[2]);
+                    txtColor.setText(Colors.getColor(color) + "\nH: " + hsv[0] + "\nS: " + hsv[1] + "\nV: " + hsv[2]);
                 }
 
                 return false;
