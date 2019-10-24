@@ -13,7 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.Matrix;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
@@ -23,12 +22,12 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -42,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     Button btnTakePicture;
     ImageView imgThumbnail, colorBox;
     String currentPhotoPath;
+    TextView txtColor;
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
@@ -58,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
         btnTakePicture = (Button) findViewById(R.id.btn_take_picture);
         imgThumbnail = (ImageView) findViewById(R.id.img_thumbnail);
         colorBox = (ImageView) findViewById(R.id.img_color);
+        txtColor = (TextView) findViewById(R.id.txt_color);
 
         btnTakePicture.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -70,60 +71,54 @@ public class MainActivity extends AppCompatActivity {
         imgThumbnail.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                //Image view is 1440px by 1920px
-                //Image size is 4032px by 3024px
-                int x = (int) (event.getX() * 1.8);
-                int y = (int) (event.getY() * 1.8);
-                Log.d(TAG, "Position: " + x + ", " + y);
+                if (imageBitmap != null) { //So we don't crash when the image doesn't exist and we tap the ImageView
+                    //Image view is 1440px by 1920px
+                    //Image size is 4032px by 3024px
+                    int x = (int) (event.getX() * 1.8);
+                    int y = (int) (event.getY() * 1.8);
+                    Log.d(TAG, "Position: " + x + ", " + y);
 
-                //Width of the square area we want to average
-                int squareSide = 3;
+                    //Width of the square area we want to average
+                    int squareSide = 3;
 
-                //[x][y][color]
-                int[][][] pixels = new int[squareSide][squareSide][3];
+                    //[x][y][color]
+                    int[][][] pixels = new int[squareSide][squareSide][3];
 
-                //Get each pixel's rgb
-                for (int i = 0; i < pixels.length; i++) {
-                    for (int j = 0; j < pixels[i].length; j++) {
-    //                        pixels[i][j][0] = Color.red(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
-    //                        pixels[i][j][1] = Color.green(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
-    //                        pixels[i][j][2] = Color.blue(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
-                        pixels[i][j][0] = Color.red(imageBitmap.getPixel(x + i - squareSide / 2, y + j - squareSide / 2));
-                        pixels[i][j][1] = Color.green(imageBitmap.getPixel(x + i - 1, y + j - 1));
-                        pixels[i][j][2] = Color.blue(imageBitmap.getPixel(x + i - 1, y + j - 1));
+                    //Get each pixel's rgb
+                    for (int i = 0; i < pixels.length; i++) {
+                        for (int j = 0; j < pixels[i].length; j++) {
+                            pixels[i][j][0] = Color.red(imageBitmap.getPixel(x + i - squareSide / 2, y + j - squareSide / 2));
+                            pixels[i][j][1] = Color.green(imageBitmap.getPixel(x + i - 1, y + j - 1));
+                            pixels[i][j][2] = Color.blue(imageBitmap.getPixel(x + i - 1, y + j - 1));
+                        }
                     }
+
+                    //Average the values of each pixel
+                    int r = 0, g = 0, b = 0;
+
+                    for (int i = 0; i < pixels.length; i++) {
+                        for (int j = 0; j < pixels[i].length; j++) {
+                            r += pixels[i][j][0];
+                            g += pixels[i][j][1];
+                            b += pixels[i][j][2];
+                        }
+                    }
+
+                    r /= Math.pow(squareSide, 2);
+                    g /= Math.pow(squareSide, 2);
+                    b /= Math.pow(squareSide, 2);
+
+                    //                 Log.d(TAG, "Raw: " + Arrays.deepToString(pixels));
+                    Log.d(TAG, "Color: " + r + ", " + g + ", " + b);
+
+                    Bitmap color = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
+                    color.eraseColor(Color.rgb(r, g, b));
+                    colorBox.setImageBitmap(color);
+
+                    txtColor.setText("Color Name" + "\nRed: " + r + "\nGreen: " + g + "\nBlue: " + b);
                 }
 
-                //Average the values of each pixel
-                 int[] pixelsAvg = new int[3];
-
-                 for (int i = 0; i < pixels.length; i++) {
-                     for (int j = 0; j < pixels[i].length; j++) {
-                         pixelsAvg[0] += pixels[i][j][0];
-                         pixelsAvg[1] += pixels[i][j][1];
-                         pixelsAvg[2] += pixels[i][j][2];
-                     }
-                 }
-
-                 pixelsAvg[0] /= Math.pow(squareSide, 2);
-                 pixelsAvg[1] /= Math.pow(squareSide, 2);
-                 pixelsAvg[2] /= Math.pow(squareSide, 2);
-
- //                String output = "";
- //                for (int i = 0; i < pixels.length; i++) {
- //                    for (int j = 0; j < pixels[i].length; j++) {
- //
- //                    }
- //                }
-
-                 Log.d(TAG, "Raw: " + Arrays.deepToString(pixels));
-                 Log.d(TAG, "Color: " + pixelsAvg[0] + ", " + pixelsAvg[1] + ", " + pixelsAvg[2]);
-
-                 Bitmap color = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
-                 color.eraseColor(Color.rgb(pixelsAvg[0], pixelsAvg[1], pixelsAvg[2]));
-                 colorBox.setImageBitmap(color);
-
-                 return false;
+                return false;
             }
         });
 
