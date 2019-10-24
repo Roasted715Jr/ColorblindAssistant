@@ -72,12 +72,12 @@ public class MainActivity extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 //Image view is 1440px by 1920px
                 //Image size is 4032px by 3024px
-                int x = (int) (event.getX() / 1440 * 4032); //This is too big to access the bitmap
-                int y = (int) (event.getY() / 1920 * 3024);
+                int x = (int) (event.getX() * 1.8);
+                int y = (int) (event.getY() * 1.8);
                 Log.d(TAG, "Position: " + x + ", " + y);
 
                 //Width of the square area we want to average
-                int squareSide = 21;
+                int squareSide = 3;
 
                 //[x][y][color]
                 int[][][] pixels = new int[squareSide][squareSide][3];
@@ -85,65 +85,73 @@ public class MainActivity extends AppCompatActivity {
                 //Get each pixel's rgb
                 for (int i = 0; i < pixels.length; i++) {
                     for (int j = 0; j < pixels[i].length; j++) {
-//                        pixels[i][j][0] = Color.red(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
-//                        pixels[i][j][1] = Color.green(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
-//                        pixels[i][j][2] = Color.blue(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
-                        pixels[i][j][0] = Color.red(rotatedBitmap.getPixel(x + i, y + j));
-                        pixels[i][j][1] = Color.green(rotatedBitmap.getPixel(x + i, y + j));
-                        pixels[i][j][2] = Color.blue(rotatedBitmap.getPixel(x + i, y + j));
+    //                        pixels[i][j][0] = Color.red(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
+    //                        pixels[i][j][1] = Color.green(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
+    //                        pixels[i][j][2] = Color.blue(imageBitmap.getPixel(x + i - (int) (squareSide / 2.0), y + j - (int) (squareSide / 2.0)));
+                        pixels[i][j][0] = Color.red(imageBitmap.getPixel(x + i - squareSide / 2, y + j - squareSide / 2));
+                        pixels[i][j][1] = Color.green(imageBitmap.getPixel(x + i - 1, y + j - 1));
+                        pixels[i][j][2] = Color.blue(imageBitmap.getPixel(x + i - 1, y + j - 1));
                     }
                 }
 
-        imgThumbnail.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                int x = (int) (event.getX() * 1.75);
-                int y = (int) (event.getY() * 1.75);
-                Log.d(TAG, "" + x + ", " + y);
+                //Average the values of each pixel
+                 int[] pixelsAvg = new int[3];
 
-                int pixel = imageBitmap.getPixel(x, y);
-//                Log.d(TAG, String.valueOf(pixel));
+                 for (int i = 0; i < pixels.length; i++) {
+                     for (int j = 0; j < pixels[i].length; j++) {
+                         pixelsAvg[0] += pixels[i][j][0];
+                         pixelsAvg[1] += pixels[i][j][1];
+                         pixelsAvg[2] += pixels[i][j][2];
+                     }
+                 }
 
-                int r = Color.red(pixel);
-                int g = Color.green(pixel);
-                int b = Color.blue(pixel);
-                Log.d(TAG, r + ", " + g + ", " + b);
+                 pixelsAvg[0] /= Math.pow(squareSide, 2);
+                 pixelsAvg[1] /= Math.pow(squareSide, 2);
+                 pixelsAvg[2] /= Math.pow(squareSide, 2);
 
-//                colorBox.setBackgroundColor(Color.rgb(r, g, b));
-//                colorBox.setImageBitmap(Bitmap.createBitmap(new int[] {r, g, b, 1}, colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16));
+ //                String output = "";
+ //                for (int i = 0; i < pixels.length; i++) {
+ //                    for (int j = 0; j < pixels[i].length; j++) {
+ //
+ //                    }
+ //                }
 
-                Bitmap color = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
-                color.eraseColor(Color.rgb(r, g, b));
-                colorBox.setImageBitmap(color);
-                
-//                 int[] pixelsAvg = new int[3];
+                 Log.d(TAG, "Raw: " + Arrays.deepToString(pixels));
+                 Log.d(TAG, "Color: " + pixelsAvg[0] + ", " + pixelsAvg[1] + ", " + pixelsAvg[2]);
 
-//                 //Average the values of each pixel
-//                 for (int i = 0; i < pixels.length; i++) {
-//                     for (int j = 0; j < pixels[i].length; j++) {
-//                         pixelsAvg[0] += pixels[i][j][0];
-//                         pixelsAvg[1] += pixels[i][j][1];
-//                         pixelsAvg[2] += pixels[i][j][2];
-//                     }
-//                 }
+                 Bitmap color = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
+                 color.eraseColor(Color.rgb(pixelsAvg[0], pixelsAvg[1], pixelsAvg[2]));
+                 colorBox.setImageBitmap(color);
 
-//                 pixelsAvg[0] /= Math.pow(squareSide, 2);
-//                 pixelsAvg[1] /= Math.pow(squareSide, 2);
-//                 pixelsAvg[2] /= Math.pow(squareSide, 2);
-
-// //                String output = "";
-// //                for (int i = 0; i < pixels.length; i++) {
-// //                    for (int j = 0; j < pixels[i].length; j++) {
-// //
-// //                    }
-// //                }
-
-//                 Log.d(TAG, "Raw: " + Arrays.deepToString(pixels));
-//                 Log.d(TAG, "Color: " + pixelsAvg[0] + ", " + pixelsAvg[1] + ", " + pixelsAvg[2]);
-
-                return false; //Not sure what true would do
+                 return false;
             }
         });
+
+//        imgThumbnail.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View v, MotionEvent event) {
+//                int x = (int) (event.getX() * 1.75);
+//                int y = (int) (event.getY() * 1.75);
+//                Log.d(TAG, "" + x + ", " + y);
+//
+//                int pixel = imageBitmap.getPixel(x, y);
+////                Log.d(TAG, String.valueOf(pixel));
+//
+//                int r = Color.red(pixel);
+//                int g = Color.green(pixel);
+//                int b = Color.blue(pixel);
+//                Log.d(TAG, r + ", " + g + ", " + b);
+//
+////                colorBox.setBackgroundColor(Color.rgb(r, g, b));
+////                colorBox.setImageBitmap(Bitmap.createBitmap(new int[] {r, g, b, 1}, colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16));
+//
+//                Bitmap color = Bitmap.createBitmap(colorBox.getWidth(), colorBox.getHeight(), Bitmap.Config.RGBA_F16);
+//                color.eraseColor(Color.rgb(r, g, b));
+//                colorBox.setImageBitmap(color);
+//
+//                return false; //Not sure what true would do
+//            }
+//        });
     }
 
     @Override
@@ -235,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
 //        this.sendBroadcast(mediaScanIntent);
 
         grantUriPermission("com.roasted715jr.colorblindassistant", Uri.fromFile(f), 0);
-        MediaStore.Images.Media.insertImage(getContentResolver(), rotatedBitmap, "Title" , "Description");
+        MediaStore.Images.Media.insertImage(getContentResolver(), imageBitmap, "Title" , "Description");
 
         Log.d(TAG, "This jawn should be in the gallery now");
     }
